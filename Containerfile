@@ -65,4 +65,5 @@ ENV TZ=Europe/Paris
 EXPOSE 9091 51413/tcp 51413/udp
 VOLUME /config /media
 
-CMD ["/usr/local/bin/transmission-daemon", "-f", "-g", "/config"]
+ENTRYPOINT [ "transmission-daemon" ]
+CMD [ "--config-dir", "/config", "--foreground" ]
