@@ -49,11 +49,12 @@ pipeline {
 
     stage('Pushing images') {
       parallel{
-        stage("push to local registry"{
+        stage("push to local registry"){
           steps {
             sh 'podman push $REGISTRY/$FULLIMAGE'
           }
         }
+
         stage("push to Docker hub"){
           steps {
             withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
