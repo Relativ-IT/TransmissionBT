@@ -63,7 +63,7 @@ COPY --from=builder /usr/local/share /usr/local/share
 ENV TZ=Europe/Paris
 
 EXPOSE 9091 51413/tcp 51413/udp
-VOLUME /config /media
+VOLUME /config /watch
 
 ENTRYPOINT [ "transmission-daemon" ]
-CMD [ "--config-dir", "/config", "--foreground" ]
+CMD [ "--config-dir", "/config", "--watch-dir", "/watch", "--foreground" ]

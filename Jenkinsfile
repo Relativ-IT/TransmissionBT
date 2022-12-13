@@ -12,6 +12,7 @@ pipeline {
     IMAGE = "transmission4"
     TAG = "latest"
     FULLIMAGE = "${env.IMAGE}:${env.TAG}"
+    DOCKER_IMAGE = "docker.io/nemric/tansmission:beta2"
   }
 
   stages {
@@ -46,9 +47,24 @@ pipeline {
       }
     }
 
-    stage('Pushing image') {
-      steps {
-        sh 'podman push $REGISTRY/$FULLIMAGE'
+    stage('Pushing images') {
+      parallel{
+        stage("push to local registry"{
+          steps {
+            sh 'podman push $REGISTRY/$FULLIMAGE'
+          }
+        }
+        stage("push to Docker hub"{
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
+              sh '''
+                podman tag $REGISTRY/$FULLIMAGE $DOCKER_IMAGE
+                podman login -u $USERNAME -p $PASSWORD docker.io
+                podman push $DOCKER_IMAGE
+              '''
+            }
+          }
+        }
       }
     }
   }
