@@ -54,7 +54,7 @@ pipeline {
             sh 'podman push $REGISTRY/$FULLIMAGE'
           }
         }
-        stage("push to Docker hub"{
+        stage("push to Docker hub"){
           steps {
             withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
               sh '''
