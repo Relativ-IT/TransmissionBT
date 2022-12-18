@@ -12,7 +12,7 @@ pipeline {
     IMAGE = "transmission4"
     TAG = "latest"
     FULLIMAGE = "${env.IMAGE}:${env.TAG}"
-    DOCKER_IMAGE = "docker.io/nemric/tansmission:beta2"
+    DOCKER_IMAGE = "docker.io/nemric/transmission:beta2"
   }
 
   stages {
