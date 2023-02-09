@@ -21,7 +21,7 @@ RUN set -ex; \
 
 FROM base AS builder
 
-ARG TransmissionTAG=4.0.0-beta.3
+ARG TransmissionTAG=4.0.0
 
 RUN set -ex; \
     apt-get install -y --no-install-recommends \
