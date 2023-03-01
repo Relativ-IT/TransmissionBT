@@ -44,13 +44,14 @@ FROM base AS runtime
 
 RUN set -ex && \
     apk update && \
+    # apk add --no-cache --upgrade libcurl libintl libgcc libssl3 libstdc++ tzdata
     apk add --no-cache --upgrade libcurl libintl libgcc libstdc++
 
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /usr/local/share /usr/local/share
 
 EXPOSE 9091/tcp 51413/tcp 51413/udp
-VOLUME /config /watch
+VOLUME /config /watch /download
 
 ENTRYPOINT [ "transmission-daemon" ]
-CMD [ "--config-dir", "/config", "--watch-dir", "/watch", "--foreground" ]
+CMD [ "--config-dir", "/config", "--watch-dir", "/watch", "--download-dir", "/download", "--foreground" ]
