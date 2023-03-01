@@ -5,16 +5,16 @@ FROM base AS builder
 ARG LatestTag=4.0.1
 
 RUN set -ex && \
-    apk add --no-cache --upgrade \
-      git \
-      python3 \
-      build-base \
-      cmake \
-      curl-dev \
-      gettext-dev \
-      openssl-dev \
-      linux-headers \
-      samurai
+	apk add --no-cache --upgrade \
+		git \
+		python3 \
+		build-base \
+		cmake \
+		curl-dev \
+		gettext-dev \
+		openssl-dev \
+		linux-headers \
+		samurai
 
 WORKDIR /usr/src
 RUN git config --global advice.detachedHead false; \
@@ -22,29 +22,28 @@ RUN git config --global advice.detachedHead false; \
 
 WORKDIR /usr/src/transmission
 RUN git submodule update --init --recursive; \
-    cmake \
-      -S . \
-      -B obj \
-      -G Ninja \
-      -D CMAKE_BUILD_TYPE=Release \
-      -D ENABLE_CLI=OFF \
-      -D ENABLE_DAEMON=ON \
-      -D ENABLE_GTK=OFF \
-      -D ENABLE_MAC=OFF \
-      -D ENABLE_QT=OFF \
-      -D ENABLE_TESTS=OFF \
-      -D ENABLE_UTILS=OFF \
-      -D RUN_CLANG_TIDY=OFF \
-      -D WITH_CRYPTO="openssl" \
-      -D WITH_SYSTEMD=OFF && \
-    cmake --build obj --config Release; \
-    cmake --build obj --config Release --target install/strip
+	cmake \
+		-S . \
+		-B obj \
+		-G Ninja \
+		-D CMAKE_BUILD_TYPE=Release \
+		-D ENABLE_CLI=OFF \
+		-D ENABLE_DAEMON=ON \
+		-D ENABLE_GTK=OFF \
+		-D ENABLE_MAC=OFF \
+		-D ENABLE_QT=OFF \
+		-D ENABLE_TESTS=OFF \
+		-D ENABLE_UTILS=OFF \
+		-D RUN_CLANG_TIDY=OFF \
+		-D WITH_CRYPTO="openssl" \
+		-D WITH_SYSTEMD=OFF && \
+	cmake --build obj --config Release; \
+	cmake --build obj --config Release --target install/strip
 
 FROM base AS runtime
 
 RUN set -ex && \
     apk update && \
-    # apk add --no-cache --upgrade libcurl libintl libgcc libssl3 libstdc++ tzdata
     apk add --no-cache --upgrade libcurl libintl libgcc libstdc++
 
 COPY --from=builder /usr/local/bin /usr/local/bin
