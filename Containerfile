@@ -2,7 +2,7 @@ FROM docker.io/alpine:latest AS base
 
 FROM base AS builder
 
-ARG BTAG=4.0.1
+ARG LatestTag=4.0.1
 
 RUN set -ex && \
     apk add --no-cache --upgrade \
@@ -18,7 +18,7 @@ RUN set -ex && \
 
 WORKDIR /usr/src
 RUN git config --global advice.detachedHead false; \
-    git clone https://github.com/transmission/transmission transmission --branch ${BTAG} --single-branch
+    git clone https://github.com/transmission/transmission transmission --branch ${LatestTag} --single-branch
 
 WORKDIR /usr/src/transmission
 RUN git submodule update --init --recursive; \
@@ -26,17 +26,17 @@ RUN git submodule update --init --recursive; \
       -S . \
       -B obj \
       -G Ninja \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DENABLE_CLI=OFF \
-      -DENABLE_DAEMON=ON \
-      -DENABLE_GTK=OFF \
-      -DENABLE_MAC=OFF \
-      -DENABLE_QT=OFF \
-      -DENABLE_TESTS=OFF \
-      -DENABLE_UTILS=OFF \
-      -DRUN_CLANG_TIDY=OFF \
-      -DWITH_CRYPTO="openssl" \
-      -DWITH_SYSTEMD=OFF && \
+      -D CMAKE_BUILD_TYPE=Release \
+      -D ENABLE_CLI=OFF \
+      -D ENABLE_DAEMON=ON \
+      -D ENABLE_GTK=OFF \
+      -D ENABLE_MAC=OFF \
+      -D ENABLE_QT=OFF \
+      -D ENABLE_TESTS=OFF \
+      -D ENABLE_UTILS=OFF \
+      -D RUN_CLANG_TIDY=OFF \
+      -D WITH_CRYPTO="openssl" \
+      -D WITH_SYSTEMD=OFF && \
     cmake --build obj --config Release; \
     cmake --build obj --config Release --target install/strip
 
