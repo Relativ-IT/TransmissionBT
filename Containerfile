@@ -2,7 +2,7 @@ FROM docker.io/alpine:latest AS base
 
 FROM base AS builder
 
-ARG LatestTag=4.0.2
+ARG LatestTag
 
 RUN set -ex && \
   apk add --no-cache --upgrade \

@@ -12,7 +12,8 @@ pipeline {
     IMAGE = "transmission4"
     TAG = "latest"
     FULLIMAGE = "${env.IMAGE}:${env.TAG}"
-    DOCKER_IMAGE = "docker.io/nemric/transmission:4.0.2"
+    TRANSMISSION_LATEST_TAG = "4.0.2"
+    DOCKER_IMAGE = "docker.io/nemric/transmission:${env.TRANSMISSION_LATEST_TAG}"
   }
 
   stages {
@@ -43,7 +44,7 @@ pipeline {
 
     stage('Building image') {
       steps {
-        sh 'podman build --pull -t $REGISTRY/$FULLIMAGE .'
+        sh 'podman build --pull --build-arg LatestTag=$TRANSMISSION_LATEST_TAG -t $REGISTRY/$FULLIMAGE .'
       }
     }
 
@@ -62,6 +63,7 @@ pipeline {
                 podman tag $REGISTRY/$FULLIMAGE $DOCKER_IMAGE
                 podman login -u $USERNAME -p $PASSWORD docker.io
                 podman push $DOCKER_IMAGE
+                podman logout docker.io
               '''
             }
           }
