@@ -11,12 +11,11 @@ pipeline {
     IMAGE = "transmission"
     TRANSMISSION_LATEST_TAG = "4.0.2"
 
-    LOCAL_REGISTRY = credentials('registry-server')
-    DOCKERHUB_REGISTRY = "docker.io/nemric"
-
     IMAGE_LATEST_IMAGE_NAME = "${env.IMAGE}:latest"
     IMAGE_LATEST_TAG_NAME = "${env.IMAGE}:${env.TRANSMISSION_LATEST_TAG}"
 
+    LOCAL_REGISTRY_IMAGE_TAG_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_LATEST_TAG_NAME}"
+    LOCAL_REGISTRY_IMAGE_LATEST_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_LATEST_IMAGE_NAME}"
     DOCKERHUB_REGISTRY_IMAGE_TAG_NAME = "${env.DOCKERHUB_REGISTRY}/${env.IMAGE_LATEST_TAG_NAME}"
     DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME = "${env.DOCKERHUB_REGISTRY}/${env.IMAGE_LATEST_IMAGE_NAME}"
   }
@@ -50,10 +49,10 @@ pipeline {
     stage('Build & tag images') {
       steps {
         sh '''
-          podman build --pull --build-arg LatestTag=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY/$IMAGE_LATEST_TAG_NAME .
-          podman tag $LOCAL_REGISTRY/$IMAGE_LATEST_TAG_NAME_NAME $LOCAL_REGISTRY/$IMAGE_LATEST_IMAGE_NAME
-          podman tag $LOCAL_REGISTRY/$IMAGE_LATEST_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME
-          podman tag $LOCAL_REGISTRY/$IMAGE_LATEST_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME
+          podman build --pull --build-arg LatestTag=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY_IMAGE_TAG_NAME .
+          podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $LOCAL_REGISTRY_IMAGE_LATEST_NAME
+          podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME
+          podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME
         '''
       }
     }
@@ -70,13 +69,13 @@ pipeline {
       parallel{
         stage("Push latest image to local registry"){
           steps {
-            sh 'podman push $LOCAL_REGISTRY/$IMAGE_LATEST_IMAGE_NAME'
+            sh 'podman push $LOCAL_REGISTRY_IMAGE_LATEST_NAME'
           }
         }
 
         stage("Push tagged image to local registry"){
           steps {
-            sh 'podman push $LOCAL_REGISTRY/$IMAGE_LATEST_TAG_NAME'
+            sh 'podman push $LOCAL_REGISTRY_IMAGE_TAG_NAME'
           }
         }
 
