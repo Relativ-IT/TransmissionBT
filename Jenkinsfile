@@ -12,7 +12,7 @@ pipeline {
     TRANSMISSION_LATEST_TAG = "4.0.2"
 
     LOCAL_REGISTRY = credentials('registry-server')
-    DOCKERHUB_REGISTRY = "docker.io/nemric/transmission"
+    DOCKERHUB_REGISTRY = "docker.io/nemric"
 
     IMAGE_LATEST_IMAGE_NAME = "${env.IMAGE}:latest"
     IMAGE_LATEST_TAG_NAME = "${env.IMAGE}:${env.TRANSMISSION_LATEST_TAG}"
@@ -60,6 +60,14 @@ pipeline {
       }
     }
 
+    stage("Login to Docker hub"){
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
+          sh 'podman login -u $USERNAME -p $PASSWORD docker.io'
+        }
+      }
+    }
+
     stage('Pushing images') {
       parallel{
         stage("Push latest image to local registry"){
@@ -76,21 +84,13 @@ pipeline {
 
         stage("Push latest image to Docker hub"){
           steps {
-            withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
-              sh '''
-                podman login -u $USERNAME -p $PASSWORD docker.io
-                podman push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME
-              '''
-            }
+            sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME'
           }
         }
 
         stage("Push tagged image to Docker hub"){
           steps {
-            sh '''
-                podman login -u $USERNAME -p $PASSWORD docker.io
-                podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME
-            '''
+              sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME'
           }
         }
       }
