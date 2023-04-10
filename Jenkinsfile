@@ -8,12 +8,17 @@ pipeline {
   }
 
   environment{
-    REGISTRY = credentials('registry-server')
+    LOCAL_REGISTRY = credentials('registry-server')
     IMAGE = "transmission4"
-    TAG = "latest"
-    FULLIMAGE = "${env.IMAGE}:${env.TAG}"
     TRANSMISSION_LATEST_TAG = "4.0.2"
-    DOCKER_IMAGE = "docker.io/nemric/transmission:${env.TRANSMISSION_LATEST_TAG}"
+    DOCKERHUB_IMAGE_PATH = "docker.io/nemric/transmission"
+    IMAGE_LATEST_IMAGE_NAME = "${env.IMAGE}:latest"
+    IMAGE_LATEST_TAG_NAME = "${env.IMAGE}:${env.TRANSMISSION_LATEST_TAG}"
+
+    LOCAL_REGISTRY_IMAGE_TAG_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_LATEST_TAG_NAME}"
+    LOCAL_REGISTRY_IMAGE_LATEST_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_LATEST_IMAGE_NAME}"
+    DOCKERHUB_REGISTRY_IMAGE_TAG_NAME = "${env.DOCKERHUB_IMAGE_PATH}/${env.IMAGE_LATEST_TAG_NAME}"
+    DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME = "${env.DOCKERHUB_IMAGE_PATH}/${env.IMAGE_LATEST_IMAGE_NAME}"
   }
 
   stages {
@@ -42,32 +47,60 @@ pipeline {
       }
     }
 
-    stage('Building image') {
+    stage('Build & tag images') {
       steps {
-        sh 'podman build --pull --build-arg LatestTag=$TRANSMISSION_LATEST_TAG -t $REGISTRY/$FULLIMAGE .'
+        sh '''
+          podman build --pull --build-arg LatestTag=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY_IMAGE_TAG_NAME .
+          podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $LOCAL_REGISTRY_IMAGE_LATEST_NAME
+          podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME
+          podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME
+        '''
+      }
+    }
+
+    stage("Login to Docker hub"){
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
+          sh 'podman login -u $USERNAME -p $PASSWORD docker.io'
+        }
       }
     }
 
     stage('Pushing images') {
       parallel{
-        stage("push to local registry"){
+        stage("Push $LOCAL_REGISTRY_IMAGE_LATEST_NAME to local registry"){
           steps {
-            sh 'podman push $REGISTRY/$FULLIMAGE'
+            sh 'podman push $LOCAL_REGISTRY_IMAGE_LATEST_NAME'
           }
         }
 
-        stage("push to Docker hub"){
+        stage("Push $LOCAL_REGISTRY_IMAGE_TAG_NAME to local registry"){
+          steps {
+            sh 'podman push $LOCAL_REGISTRY_IMAGE_TAG_NAME'
+          }
+        }
+
+        stage("Push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME to Docker hub"){
           steps {
             withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
-              sh '''
-                podman tag $REGISTRY/$FULLIMAGE $DOCKER_IMAGE
-                podman login -u $USERNAME -p $PASSWORD docker.io
-                podman push $DOCKER_IMAGE
-                podman logout docker.io
-              '''
+              sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME'
             }
           }
         }
+
+        stage("Push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME to to Docker hub"){
+          steps {
+            sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME'
+          }
+        }
+      }
+    }
+  }
+
+  stage("Logout from Docker hub"){
+    steps {
+      withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
+        sh 'podman logout docker.io'
       }
     }
   }
