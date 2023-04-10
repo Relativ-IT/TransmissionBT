@@ -68,19 +68,19 @@ pipeline {
 
     stage('Pushing images') {
       parallel{
-        stage("Push $LOCAL_REGISTRY_IMAGE_LATEST_NAME to local registry"){
+        stage("Push ${env.LOCAL_REGISTRY_IMAGE_LATEST_NAME} to local registry"){
           steps {
             sh 'podman push $LOCAL_REGISTRY_IMAGE_LATEST_NAME'
           }
         }
 
-        stage("Push $LOCAL_REGISTRY_IMAGE_TAG_NAME to local registry"){
+        stage("Push ${env.LOCAL_REGISTRY_IMAGE_TAG_NAME} to local registry"){
           steps {
             sh 'podman push $LOCAL_REGISTRY_IMAGE_TAG_NAME'
           }
         }
 
-        stage("Push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME to Docker hub"){
+        stage("Push ${env.DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME} to Docker hub"){
           steps {
             withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
               sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME'
@@ -88,7 +88,7 @@ pipeline {
           }
         }
 
-        stage("Push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME to to Docker hub"){
+        stage("Push ${env.DOCKERHUB_REGISTRY_IMAGE_TAG_NAME} to to Docker hub"){
           steps {
             sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME'
           }
