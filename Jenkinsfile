@@ -99,9 +99,7 @@ pipeline {
 
   stage("Logout from Docker hub"){
     steps {
-      withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
-        sh 'podman logout docker.io'
-      }
+      sh 'podman logout docker.io'
     }
   }
 
