@@ -95,11 +95,11 @@ pipeline {
         }
       }
     }
-  }
 
-  stage("Logout from Docker hub"){
-    steps {
-      sh 'podman logout docker.io'
+    stage("Logout from Docker hub"){
+      steps {
+        sh 'podman logout docker.io'
+      }
     }
   }
 
