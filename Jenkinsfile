@@ -8,17 +8,19 @@ pipeline {
   }
 
   environment{
-    LOCAL_REGISTRY = credentials('registry-server')
-    IMAGE = "transmission4"
+    IMAGE = "transmission"
     TRANSMISSION_LATEST_TAG = "4.0.2"
-    DOCKERHUB_IMAGE_PATH = "docker.io/nemric/transmission"
+
+    LOCAL_REGISTRY = credentials('registry-server')
+    DOCKERHUB_REGISTRY = "docker.io/nemric/transmission"
+
     IMAGE_LATEST_IMAGE_NAME = "${env.IMAGE}:latest"
     IMAGE_LATEST_TAG_NAME = "${env.IMAGE}:${env.TRANSMISSION_LATEST_TAG}"
 
     LOCAL_REGISTRY_IMAGE_TAG_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_LATEST_TAG_NAME}"
     LOCAL_REGISTRY_IMAGE_LATEST_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_LATEST_IMAGE_NAME}"
-    DOCKERHUB_REGISTRY_IMAGE_TAG_NAME = "${env.DOCKERHUB_IMAGE_PATH}/${env.IMAGE_LATEST_TAG_NAME}"
-    DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME = "${env.DOCKERHUB_IMAGE_PATH}/${env.IMAGE_LATEST_IMAGE_NAME}"
+    DOCKERHUB_REGISTRY_IMAGE_TAG_NAME = "${env.DOCKERHUB_REGISTRY}/${env.IMAGE_LATEST_TAG_NAME}"
+    DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME = "${env.DOCKERHUB_REGISTRY}/${env.IMAGE_LATEST_IMAGE_NAME}"
   }
 
   stages {
