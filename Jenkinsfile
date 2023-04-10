@@ -60,14 +60,6 @@ pipeline {
       }
     }
 
-    stage("Login to Docker hub"){
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
-          sh 'podman login -u $USERNAME -p $PASSWORD docker.io'
-        }
-      }
-    }
-
     stage('Pushing images') {
       parallel{
         stage("Push latest image to local registry"){
@@ -85,14 +77,20 @@ pipeline {
         stage("Push latest image to Docker hub"){
           steps {
             withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
-              sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME'
+              sh '''
+                podman login -u $USERNAME -p $PASSWORD docker.io
+                podman push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME
+              '''
             }
           }
         }
 
         stage("Push tagged image to Docker hub"){
           steps {
-            sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME'
+            sh '''
+                podman login -u $USERNAME -p $PASSWORD docker.io
+                podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME
+            '''
           }
         }
       }
