@@ -37,6 +37,10 @@ pipeline {
 
         stage('Print Podman infos') {
           steps {
+            sh '''
+              podman version
+              podman system info
+            '''
           }
         }
       }
@@ -106,10 +110,6 @@ pipeline {
     }
     
     cleanup {
-      sh '''
-        podman container prune --force
-        podman image prune --force
-      '''
       cleanWs()
     }
   }
