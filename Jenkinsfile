@@ -9,7 +9,7 @@ pipeline {
 
   environment{
     IMAGE = "transmission"
-    TRANSMISSION_LATEST_TAG = "4.0.2"
+    TRANSMISSION_LATEST_TAG = "4.0.3"
 
     IMAGE_LATEST_IMAGE_NAME = "${env.IMAGE}:latest"
     IMAGE_LATEST_TAG_NAME = "${env.IMAGE}:${env.TRANSMISSION_LATEST_TAG}"
