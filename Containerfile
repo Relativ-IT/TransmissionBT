@@ -2,7 +2,7 @@ FROM docker.io/alpine:latest AS base
 
 FROM base AS builder
 
-ARG LatestTag
+ARG BRANCH
 
 RUN set -ex && \
     apk add --no-cache --upgrade \
@@ -18,7 +18,7 @@ RUN set -ex && \
 
 WORKDIR /usr/src
 RUN git config --global advice.detachedHead false; \
-    git clone https://github.com/transmission/transmission transmission --branch ${LatestTag} --single-branch
+    git clone https://github.com/transmission/transmission transmission --branch ${BRANCH} --single-branch
 
 WORKDIR /usr/src/transmission
 RUN git submodule update --init --recursive; \

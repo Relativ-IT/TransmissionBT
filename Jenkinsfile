@@ -10,14 +10,18 @@ pipeline {
   environment{
     IMAGE = "transmission"
     TRANSMISSION_LATEST_TAG = "4.0.3"
+    TRANSMISSION_MAIN_TAG = "main"
 
     IMAGE_LATEST_IMAGE_NAME = "${env.IMAGE}:latest"
+    IMAGE_MAIN_IMAGE_NAME = "${env.IMAGE}:${env.TRANSMISSION_MAIN_TAG}"
     IMAGE_LATEST_TAG_NAME = "${env.IMAGE}:${env.TRANSMISSION_LATEST_TAG}"
 
     LOCAL_REGISTRY_IMAGE_TAG_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_LATEST_TAG_NAME}"
     LOCAL_REGISTRY_IMAGE_LATEST_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_LATEST_IMAGE_NAME}"
+    LOCAL_REGISTRY_IMAGE_MAIN_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_MAIN_IMAGE_NAME}"
     DOCKERHUB_REGISTRY_IMAGE_TAG_NAME = "${env.DOCKERHUB_REGISTRY}/${env.IMAGE_LATEST_TAG_NAME}"
     DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME = "${env.DOCKERHUB_REGISTRY}/${env.IMAGE_LATEST_IMAGE_NAME}"
+    DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME = "${env.DOCKERHUB_REGISTRY}/${env.IMAGE_MAIN_IMAGE_NAME}"
   }
 
   stages {
@@ -49,10 +53,13 @@ pipeline {
     stage('Build & tag images') {
       steps {
         sh '''
-          podman build --pull --build-arg LatestTag=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY_IMAGE_TAG_NAME .
+          podman build --pull --build-arg BRANCH=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY_IMAGE_TAG_NAME .
+
           podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $LOCAL_REGISTRY_IMAGE_LATEST_NAME
           podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME
           podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME
+
+          podman build --build-arg BRANCH=$TRANSMISSION_MAIN_TAG -t $IMAGE_MAIN_IMAGE_NAME .
         '''
       }
     }
@@ -79,6 +86,12 @@ pipeline {
           }
         }
 
+        stage("Push main image to local registry"){
+          steps {
+              sh 'podman push $LOCAL_REGISTRY_IMAGE_MAIN_NAME'
+          }
+        }
+
         stage("Push latest image to Docker hub"){
           steps {
             sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME'
@@ -88,6 +101,12 @@ pipeline {
         stage("Push tagged image to Docker hub"){
           steps {
               sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME'
+          }
+        }
+
+        stage("Push main image to Docker hub"){
+          steps {
+              sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME'
           }
         }
       }
