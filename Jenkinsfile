@@ -16,12 +16,12 @@ pipeline {
     IMAGE_MAIN_IMAGE_NAME = "${env.IMAGE}:${env.TRANSMISSION_MAIN_TAG}"
     IMAGE_LATEST_TAG_NAME = "${env.IMAGE}:${env.TRANSMISSION_LATEST_TAG}"
 
-    LOCAL_REGISTRY_IMAGE_TAG_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_LATEST_TAG_NAME}"
-    LOCAL_REGISTRY_IMAGE_LATEST_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_LATEST_IMAGE_NAME}"
-    LOCAL_REGISTRY_IMAGE_MAIN_NAME = "${env.LOCAL_REGISTRY}/${env.IMAGE_MAIN_IMAGE_NAME}"
-    DOCKERHUB_REGISTRY_IMAGE_TAG_NAME = "${env.DOCKERHUB_REGISTRY}/${env.IMAGE_LATEST_TAG_NAME}"
-    DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME = "${env.DOCKERHUB_REGISTRY}/${env.IMAGE_LATEST_IMAGE_NAME}"
-    DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME = "${env.DOCKERHUB_REGISTRY}/${env.IMAGE_MAIN_IMAGE_NAME}"
+    LOCAL_REGISTRY_IMAGE_TAG_NAME = "${env.REGISTRY_LOCAL}/${env.IMAGE_LATEST_TAG_NAME}"
+    LOCAL_REGISTRY_IMAGE_LATEST_NAME = "${env.REGISTRY_LOCAL}/${env.IMAGE_LATEST_IMAGE_NAME}"
+    LOCAL_REGISTRY_IMAGE_MAIN_NAME = "${env.REGISTRY_LOCAL}/${env.IMAGE_MAIN_IMAGE_NAME}"
+    DOCKERHUB_REGISTRY_IMAGE_TAG_NAME = "${env.REGISTRY_DOCKERHUB}/${env.IMAGE_LATEST_TAG_NAME}"
+    DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME = "${env.REGISTRY_DOCKERHUB}/${env.IMAGE_LATEST_IMAGE_NAME}"
+    DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME = "${env.REGISTRY_DOCKERHUB}/${env.IMAGE_MAIN_IMAGE_NAME}"
   }
 
   stages {
@@ -89,7 +89,7 @@ pipeline {
 
         stage("Push main image to local registry"){
           steps {
-              sh 'podman push $LOCAL_REGISTRY_IMAGE_MAIN_NAME'
+            sh 'podman push $LOCAL_REGISTRY_IMAGE_MAIN_NAME'
           }
         }
 
@@ -101,13 +101,13 @@ pipeline {
 
         stage("Push tagged image to Docker hub"){
           steps {
-              sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME'
+            sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME'
           }
         }
 
         stage("Push main image to Docker hub"){
           steps {
-              sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME'
+            sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME'
           }
         }
       }
