@@ -34,6 +34,15 @@ RUN git submodule update --init --recursive; \
 			-D ENABLE_QT=OFF \
 			-D ENABLE_TESTS=OFF \
 			-D ENABLE_UTILS=OFF \
+			-D ENABLE_UTP=ON \
+			-D INSTALL_WEB=ON \
+			-D REBUILD_WEB=OFF \
+			-D ENABLE_WERROR=OFF \
+			-D ENABLE_DEPRECATED=OFF \
+			-D ENABLE_NLS=ON \
+			-D INSTALL_DOC=OFF \
+			-D INSTALL_LIB=OFF \
+			-D WITH_INOTIFY=ON \
 			-D RUN_CLANG_TIDY=OFF \
 			-D WITH_CRYPTO="openssl" \
 			-D WITH_SYSTEMD=OFF && \
