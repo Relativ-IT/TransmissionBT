@@ -66,7 +66,7 @@ pipeline {
     }
 
     stage("Login to Docker hub") {
-      when {branch 'main'}
+      when {branch 'Release'}
       steps {
         withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
           sh 'podman login -u $USERNAME -p $PASSWORD docker.io'
@@ -75,7 +75,7 @@ pipeline {
     }
 
     stage('Pushing images') {
-      when {branch 'main'}
+      when {branch 'Release'}
       parallel{
         stage("Push latest image to local registry") {
           steps {
@@ -116,7 +116,7 @@ pipeline {
     }
 
     stage("Logout from Docker hub") {
-      when {branch 'main'}
+      when {branch 'Release'}
       steps {
         sh 'podman logout docker.io'
       }

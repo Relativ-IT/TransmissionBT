@@ -17,12 +17,12 @@ RUN set -ex && \
 		samurai
 
 WORKDIR /usr/src
-RUN git config --global advice.detachedHead false; \
-    git clone https://github.com/transmission/transmission transmission --branch ${BRANCH} --single-branch
+RUN git clone https://github.com/transmission/transmission transmission
 
 WORKDIR /usr/src/transmission
-RUN git submodule update --init --recursive; \
-    cmake \
+RUN git checkout ${BRANCH} && git submodule update --init --recursive
+
+RUN cmake \
 			-S . \
 			-B obj \
 			-G Ninja \
