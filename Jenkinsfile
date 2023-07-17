@@ -1,6 +1,6 @@
 pipeline {
   triggers {
-    cron(env.BRANCH_NAME == 'main' ? '@weekly' : '')
+    cron(env.BRANCH_NAME == 'Release' ? '@weekly' : '')
   }
 
   agent {
