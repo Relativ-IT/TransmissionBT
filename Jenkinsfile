@@ -7,7 +7,7 @@ pipeline {
     label 'Linux && Podman'
   }
 
-  environment{
+  environment {
     IMAGE = "transmission"
     TRANSMISSION_LATEST_TAG = "4.0.3"
     TRANSMISSION_MAIN_TAG = "main"
@@ -27,7 +27,7 @@ pipeline {
   stages {
     stage('Initialize') {
       parallel {
-        stage('Advertising start of build'){
+        stage('Advertising start of build') {
           steps{
             slackSend color: "#4675b1", message: "${env.JOB_NAME} build #${env.BUILD_NUMBER} started :fire: (<${env.RUN_DISPLAY_URL}|Open>)"
           }
@@ -53,59 +53,61 @@ pipeline {
     stage('Build & tag images') {
       steps {
         sh '''
-          podman build --pull --build-arg BRANCH=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY_IMAGE_TAG_NAME .
+          podman build --pull --cache-ttl=1h --build-arg BRANCH=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY_IMAGE_TAG_NAME .
 
           podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $LOCAL_REGISTRY_IMAGE_LATEST_NAME
           podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME
           podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME
 
-          podman build --build-arg BRANCH=$TRANSMISSION_MAIN_TAG -t $LOCAL_REGISTRY_IMAGE_MAIN_NAME .
+          podman build --pull --cache-ttl=1h --build-arg BRANCH=$TRANSMISSION_MAIN_TAG -t $LOCAL_REGISTRY_IMAGE_MAIN_NAME .
           podman tag $LOCAL_REGISTRY_IMAGE_MAIN_NAME $DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME
         '''
       }
     }
 
-    stage("Login to Docker hub"){
+    stage("Login to Docker hub") {
+      when {branch 'main'}
       steps {
-        withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
+        withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
           sh 'podman login -u $USERNAME -p $PASSWORD docker.io'
         }
       }
     }
 
     stage('Pushing images') {
+      when {branch 'main'}
       parallel{
-        stage("Push latest image to local registry"){
+        stage("Push latest image to local registry") {
           steps {
             sh 'podman push $LOCAL_REGISTRY_IMAGE_LATEST_NAME'
           }
         }
 
-        stage("Push tagged image to local registry"){
+        stage("Push tagged image to local registry") {
           steps {
             sh 'podman push $LOCAL_REGISTRY_IMAGE_TAG_NAME'
           }
         }
 
-        stage("Push main image to local registry"){
+        stage("Push main image to local registry") {
           steps {
             sh 'podman push $LOCAL_REGISTRY_IMAGE_MAIN_NAME'
           }
         }
 
-        stage("Push latest image to Docker hub"){
+        stage("Push latest image to Docker hub") {
           steps {
             sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME'
           }
         }
 
-        stage("Push tagged image to Docker hub"){
+        stage("Push tagged image to Docker hub") {
           steps {
             sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME'
           }
         }
 
-        stage("Push main image to Docker hub"){
+        stage("Push main image to Docker hub") {
           steps {
             sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME'
           }
@@ -113,7 +115,8 @@ pipeline {
       }
     }
 
-    stage("Logout from Docker hub"){
+    stage("Logout from Docker hub") {
+      when {branch 'main'}
       steps {
         sh 'podman logout docker.io'
       }
