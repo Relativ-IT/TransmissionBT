@@ -53,13 +53,13 @@ pipeline {
     stage('Build & tag images') {
       steps {
         sh '''
-          podman build --pull --cache-ttl=1h --build-arg BRANCH=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY_IMAGE_TAG_NAME .
+          podman build --network slirp4netns \ --pull --cache-ttl=1h --build-arg BRANCH=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY_IMAGE_TAG_NAME .
 
           podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $LOCAL_REGISTRY_IMAGE_LATEST_NAME
           podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME
           podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME
 
-          podman build --pull --cache-ttl=1h --build-arg BRANCH=$TRANSMISSION_MAIN_TAG -t $LOCAL_REGISTRY_IMAGE_MAIN_NAME .
+          podman build --network slirp4netns \ --pull --cache-ttl=1h --build-arg BRANCH=$TRANSMISSION_MAIN_TAG -t $LOCAL_REGISTRY_IMAGE_MAIN_NAME .
           podman tag $LOCAL_REGISTRY_IMAGE_MAIN_NAME $DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME
         '''
       }
