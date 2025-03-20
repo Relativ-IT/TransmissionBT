@@ -38,29 +38,20 @@ pipeline {
             sh 'printenv | sort'
           }
         }
-
-        stage('Print Podman infos') {
-          steps {
-            sh '''
-              podman version
-              podman system info
-            '''
-          }
-        }
       }
     }
 
     stage('Build & tag images') {
       steps {
         sh '''
-          podman build --network slirp4netns --pull --cache-ttl=1h --build-arg BRANCH=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY_IMAGE_TAG_NAME .
+          buildah build --network slirp4netns --pull --cache-ttl=1h --build-arg BRANCH=$TRANSMISSION_LATEST_TAG -t $LOCAL_REGISTRY_IMAGE_TAG_NAME .
 
-          podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $LOCAL_REGISTRY_IMAGE_LATEST_NAME
-          podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME
-          podman tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME
+          buildah tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $LOCAL_REGISTRY_IMAGE_LATEST_NAME
+          buildah tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME
+          buildah tag $LOCAL_REGISTRY_IMAGE_TAG_NAME $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME
 
-          podman build --network slirp4netns --pull --cache-ttl=1h --build-arg BRANCH=$TRANSMISSION_MAIN_TAG -t $LOCAL_REGISTRY_IMAGE_MAIN_NAME .
-          podman tag $LOCAL_REGISTRY_IMAGE_MAIN_NAME $DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME
+          buildah build --network slirp4netns --pull --cache-ttl=1h --build-arg BRANCH=$TRANSMISSION_MAIN_TAG -t $LOCAL_REGISTRY_IMAGE_MAIN_NAME .
+          buildah tag $LOCAL_REGISTRY_IMAGE_MAIN_NAME $DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME
         '''
       }
     }
@@ -69,7 +60,7 @@ pipeline {
       when {branch 'Release'}
       steps {
         withCredentials([usernamePassword(credentialsId: 'DockerHub_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          sh 'podman login -u $USERNAME -p $PASSWORD docker.io'
+          sh 'buildah login -u $USERNAME -p $PASSWORD docker.io'
         }
       }
     }
@@ -79,37 +70,37 @@ pipeline {
       parallel{
         stage("Push latest image to local registry") {
           steps {
-            sh 'podman push $LOCAL_REGISTRY_IMAGE_LATEST_NAME'
+            sh 'buildah push $LOCAL_REGISTRY_IMAGE_LATEST_NAME'
           }
         }
 
         stage("Push tagged image to local registry") {
           steps {
-            sh 'podman push $LOCAL_REGISTRY_IMAGE_TAG_NAME'
+            sh 'buildah push $LOCAL_REGISTRY_IMAGE_TAG_NAME'
           }
         }
 
         stage("Push main image to local registry") {
           steps {
-            sh 'podman push $LOCAL_REGISTRY_IMAGE_MAIN_NAME'
+            sh 'buildah push $LOCAL_REGISTRY_IMAGE_MAIN_NAME'
           }
         }
 
         stage("Push latest image to Docker hub") {
           steps {
-            sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME'
+            sh 'buildah push $DOCKERHUB_REGISTRY_IMAGE_LATEST_NAME'
           }
         }
 
         stage("Push tagged image to Docker hub") {
           steps {
-            sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME'
+            sh 'buildah push $DOCKERHUB_REGISTRY_IMAGE_TAG_NAME'
           }
         }
 
         stage("Push main image to Docker hub") {
           steps {
-            sh 'podman push $DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME'
+            sh 'buildah push $DOCKERHUB_REGISTRY_IMAGE_MAIN_NAME'
           }
         }
       }
@@ -118,7 +109,7 @@ pipeline {
     stage("Logout from Docker hub") {
       when {branch 'Release'}
       steps {
-        sh 'podman logout docker.io'
+        sh 'buildah logout docker.io'
       }
     }
   }
