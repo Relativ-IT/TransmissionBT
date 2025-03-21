@@ -38,6 +38,15 @@ pipeline {
             sh 'printenv | sort'
           }
         }
+
+        stage('Print Buildah infos') {
+          steps {
+            sh '''
+              buildah version
+              buildah info
+            '''
+          }
+        }
       }
     }
 
