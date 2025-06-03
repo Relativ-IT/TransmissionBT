@@ -35,4 +35,6 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           load: true
+          file: Containerfile
+          build-arg: BRANCH="${{ matrix.tags }}"
           tags: nemric/transmission:${{ matrix.tags }}
