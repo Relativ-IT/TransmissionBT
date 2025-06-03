@@ -2,7 +2,10 @@ name: Image build
 
 on:
   push:
-
+  
+env:
+  LATEST: 4.0.6
+  
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -24,17 +27,27 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
+      - name: Set tag
+        id: tag-builder
+        run: |
+          temptag="nemric/transmission:${{ matrix.tags }}" 
+          if [ "${{ matrix.tags }}" == $LATEST ]; then
+            temptag="${temptag}, nemric/transmission:latest"
+          fi
+          echo "IMAGETAG=${temptag}" >> "$GITHUB_OUTPUT"
+      
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
-          load: true
+          push: ${{ github.event_name != 'pull_request' }}
+          load: ${{ github.event_name == 'pull_request' }}
           file: Containerfile
-          build-arg: BRANCH="${{ matrix.tags }}"
-          tags: nemric/transmission:${{ matrix.tags }}
+          build-args: BRANCH=${{ matrix.tags }}
+          tags: ${{ steps.tag-builder.outputs.IMAGETAG }}
