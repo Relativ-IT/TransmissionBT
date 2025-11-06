@@ -63,3 +63,4 @@ jobs:
           load: ${{ github.ref_name != 'Release' && github.event_name != 'schedule' }}
           build-args: BRANCH=${{ matrix.tags }}
           tags: ${{ steps.tag-builder.outputs.IMAGETAG }}
+          file: ./Containerfile
