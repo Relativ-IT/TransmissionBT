@@ -9,7 +9,7 @@ on:
     - cron: '0 0 * * 0' # Every Sunday at midnight
   
 env:
-  LATEST: 4.0.6
+  LATEST: 4.1.0
   
 jobs:
   docker:
@@ -17,7 +17,7 @@ jobs:
 
     strategy:
       matrix:
-        tags: [main, 4.1.0-beta.5]
+        tags: [main, 4.1.0]
 
     steps:
       - name: Checkout
